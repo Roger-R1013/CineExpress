@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CINE EXPRESS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="logo">CINE EXPRESS<span>· Tu cine de élite ·</span></div>
+  <ul class="nav-links">
+    <li><a href="#cartelera">Cartelera</a></li>
+    <li><a href="#entradas">Entradas</a></li>
+    <li><a href="#menu">Menú</a></li>
+    <li><a href="#perfil">Mi Perfil</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="carrito-btn" onclick="toggleCarrito()">
+      🛒 <span class="carrito-count" id="carritoCount">0</span>
+    </button>
+    {% if usuario %}
+    <div class="nav-profile" onclick="scrollSec('perfil')">
+      <div class="avatar">{{ usuario['nombre'][0] }}</div>
+      <span>{{ usuario['nombre'].split()[0] }}</span>
+    </div>
+    {% else %}
+    <button class="btn-gold small" onclick="openLogin()"><span>Iniciar Sesión</span></button>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">⭐ Experiencia cinematográfica premium</div>
+    <h1 class="hero-title">CINE EXPRESS</h1>
+    <p class="hero-sub">Donde el cine cobra vida</p>
+    <p class="hero-desc">Las mejores películas, la mejor experiencia. Disfruta con tecnología Dolby Atmos y pantallas 4K.</p>
+    <div class="hero-cta">
+      <button class="btn-gold" onclick="scrollSec('cartelera')"><span>Ver Cartelera</span></button>
+      <button class="btn-outline" onclick="scrollSec('entradas')">Comprar Entradas</button>
+    </div>
+  </div>
+  <div class="hero-scroll">Explorar</div>
+</section>
+
+<!-- CARTELERA -->
+<section id="cartelera">
+  <div class="section-header">
+    <div class="section-eyebrow">🎬 En cartelera</div>
+    <h2 class="section-title">Películas de esta semana</h2>
+    <div class="gold-line"></div>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="todas">Todas</button>
+    <button class="filter-btn" data-filter="accion">Acción</button>
+    <button class="filter-btn" data-filter="drama">Drama</button>
+    <button class="filter-btn" data-filter="ciencia">Ciencia Ficción</button>
+    <button class="filter-btn" data-filter="animacion">Animación</button>
+    <button class="filter-btn" data-filter="suspenso">Suspenso</button>
+  </div>
+  <div class="movies-grid" id="moviesGrid">
+    {% for p in peliculas %}
+    <div class="movie-card"
+         data-genero="{{ p['genero'] }}"
+         data-id="{{ p['id'] }}"
+         data-titulo="{{ p['titulo'] }}"
+         data-genero2="{{ p['genero'] }}"
+         data-desc="{{ p['descripcion'] }}"
+         data-cal="{{ p['calificacion'] }}"
+         data-img="{{ p['imagen'] }}"
+         onclick="abrirPelicula(this)">
+      {% if p['estado'] == 'estreno' %}
+        <div class="movie-badge badge-estreno">ESTRENO</div>
+      {% elif p['estado'] == 'proximamente' %}
+        <div class="movie-badge badge-pronto">PRÓXIMAMENTE</div>
+      {% endif %}
+      <div class="movie-poster-wrap">
+        <img src="{{ p['imagen'] }}" alt="{{ p['titulo'] }}"/>
+      </div>
+      <div class="movie-overlay">
+        <div class="movie-info-bottom">
+          <div class="movie-rating">⭐ {{ p['calificacion'] }}</div>
+          <div class="movie-info-title">{{ p['titulo'] }}</div>
+          <div class="movie-genre">{{ p['genero'] }}</div>
+          <button class="btn-comprar">Comprar Entrada</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ENTRADAS -->
+<section id="entradas">
+  <div class="section-header">
+    <div class="section-eyebrow">🎟️ Precios</div>
+    <h2 class="section-title">Compra tus Entradas</h2>
+    <div class="gold-line"></div>
+  </div>
+  <div class="entradas-container">
+    {% for e in entradas %}
+    <div class="entrada-card">
+      <div class="entrada-icon">{{ e['icono'] }}</div>
+      <div class="entrada-info">
+        <div class="entrada-tipo">{{ e['nombre'] }}</div>
+        <div class="entrada-desc">{{ e['descripcion'] }}</div>
+      </div>
+      <div class="entrada-precio">
+        <div class="precio-amount">Bs. {{ "%.0f"|format(e['precio']) }}</div>
+        <div class="precio-currency">por persona</div>
+        <button class="btn-reservar"
+          data-id="{{ e['id'] }}"
+          data-nombre="{{ e['nombre'] }}"
+          data-precio="{{ e['precio'] }}"
+          onclick="agregarEntradaCarrito(this)">
+          Agregar al carrito
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- MENÚ -->
+<section id="menu">
+  <div class="section-header">
+    <div class="section-eyebrow">🍿 Snacks & Bebidas</div>
+    <h2 class="section-title">Nuestro Menú</h2>
+    <div class="gold-line"></div>
+  </div>
+  <div class="menu-grid">
+    {% for item in menu %}
+    <div class="menu-item"
+         data-id="{{ item['id'] }}"
+         data-nombre="{{ item['nombre'] }}"
+         data-precio="{{ item['precio'] }}"
+         onclick="agregarMenuCarrito(this)">
+      {% if item['popular'] %}<div class="gold-tag">⭐ Popular</div>{% endif %}
+      <div class="menu-img-wrap">
+        <img src="{{ item['imagen'] }}" alt="{{ item['nombre'] }}"/>
+      </div>
+      <div class="menu-name">{{ item['nombre'] }}</div>
+      <div class="menu-desc">{{ item['descripcion'] }}</div>
+      <div class="menu-price">Bs. {{ "%.0f"|format(item['precio']) }}</div>
+      <button class="btn-menu-add">+ Agregar</button>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- PERFIL -->
+<section id="perfil">
+  <div class="perfil-container">
+    <div class="section-header">
+      <div class="section-eyebrow">👤 Cuenta</div>
+      <h2 class="section-title">Mi Perfil</h2>
+      <div class="gold-line"></div>
+    </div>
+    {% if usuario %}
+    <div class="perfil-card">
+      <div class="perfil-header">
+        <div class="perfil-avatar-wrap">
+          <div class="perfil-avatar">{{ usuario['nombre'][0] }}</div>
+          <div class="perfil-name-area">
+            <div class="perfil-nombre">{{ usuario['nombre'] }}</div>
+            <div class="perfil-member">Miembro Gold · {{ usuario['puntos'] }} puntos</div>
+          </div>
+        </div>
+        <div class="perfil-tabs">
+          <div class="perfil-tab active" onclick="switchTab('resumen',this)">Resumen</div>
+          <div class="perfil-tab" onclick="switchTab('historial',this)">Historial</div>
+          <div class="perfil-tab" onclick="switchTab('ajustes',this)">Ajustes</div>
+        </div>
+      </div>
+      <div class="perfil-body">
+        <div id="tab-resumen" class="tab-content active">
+          <div class="perfil-stats">
+            <div class="stat-box">
+              <div class="stat-num" id="stat-compras">–</div>
+              <div class="stat-label">Compras realizadas</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num">{{ usuario['puntos'] }}</div>
+              <div class="stat-label">Puntos acumulados</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" id="stat-total">–</div>
+              <div class="stat-label">Total gastado (Bs.)</div>
+            </div>
+          </div>
+          <div class="historial-title">Últimas compras</div>
+          <div id="historial-list"><p style="color:var(--plomo-texto);font-size:.85rem">Cargando...</p></div>
+        </div>
+        <div id="tab-historial" class="tab-content">
+          <div id="historial-completo"><p style="color:var(--plomo-texto);font-size:.85rem">Cargando...</p></div>
+        </div>
+        <div id="tab-ajustes" class="tab-content">
+          <div class="ajustes-form">
+            <p class="ajustes-label">Nombre</p>
+            <input class="ajustes-input" value="{{ usuario['nombre'] }}" readonly/>
+            <p class="ajustes-label">Email</p>
+            <input class="ajustes-input" value="{{ usuario['email'] }}" readonly/>
+            <div style="margin-top:24px;">
+              <a href="{{ url_for('logout') }}" class="btn-outline">Cerrar Sesión</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="login-prompt">
+      <div style="font-size:3rem;margin-bottom:16px;">🔐</div>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--blanco);margin-bottom:8px;">Inicia sesión para ver tu perfil</h3>
+      <p style="color:var(--plomo-texto);margin-bottom:24px;">Accede a tu historial de compras, puntos y más.</p>
+      <button class="btn-gold" onclick="openLogin()"><span>Iniciar Sesión</span></button>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <span class="logo">CINE EXPRESS</span>
+      <p>La mejor experiencia cinematográfica de la ciudad. Tecnología de vanguardia y las mejores películas.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navegación</h4>
+      <ul>
+        <li onclick="scrollSec('cartelera')">Cartelera</li>
+        <li onclick="scrollSec('entradas')">Entradas</li>
+        <li onclick="scrollSec('menu')">Menú</li>
+        <li onclick="scrollSec('perfil')">Mi Perfil</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Salas</h4>
+      <ul>
+        <li>Sala 1 - General</li>
+        <li>Sala 2 - Premium</li>
+        <li>Sala 3 - VIP</li>
+        <li>Sala 4 - Dolby Atmos</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li>📍 Av. Busch, Santa Cruz</li>
+        <li>📞 +591 77 777 777</li>
+        <li>✉️ cineexpress@gmail.com</li>
+        <li>🕐 10:00 – 23:00</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-divider"></div>
+  <div class="footer-bottom">
+    <span>© 2026 <span class="footer-gold">CINE EXPRESS</span>. Todos los derechos reservados.</span>
+    <span>Diseñado con <span class="footer-gold">♦</span> para amantes del cine</span>
+  </div>
+</footer>
+
+<!-- MODAL PELÍCULA -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModalFondo(event)">
+  <div class="modal" id="modalPelicula">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-poster">
+      <img id="modalImg" src="" alt=""/>
+    </div>
+    <div class="modal-info">
+      <div class="movie-rating" id="modalRating"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-genre" id="modalGenre"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+
+      <div class="modal-section">
+        <h4>📅 Selecciona Horario</h4>
+        <div class="horarios-grid" id="horariosGrid">
+          <span style="color:var(--plomo-texto);font-size:.8rem">Cargando horarios...</span>
+        </div>
+      </div>
+
+      <div class="modal-section" id="seccionAsientos" style="display:none">
+        <h4>🪑 Selecciona tus Asientos</h4>
+        <p style="font-size:.75rem;color:var(--plomo-texto);margin-bottom:12px;" id="infoSala"></p>
+        <div class="pantalla-cine">◀ PANTALLA ▶</div>
+        <div class="sala-grid" id="salaGrid"></div>
+        <div class="leyenda">
+          <span class="leyenda-item"><span class="asiento-demo libre"></span> Libre</span>
+          <span class="leyenda-item"><span class="asiento-demo ocupado"></span> Ocupado</span>
+          <span class="leyenda-item"><span class="asiento-demo seleccionado"></span> Seleccionado</span>
+        </div>
+        <p style="font-size:.8rem;color:var(--dorado);margin-top:10px;">
+          Asientos: <span id="asientosSelText">Ninguno</span>
+        </p>
+      </div>
+
+      <div class="modal-section">
+        <h4>🎟️ Tipo de Entrada</h4>
+        <select id="modalEntradaTipo" class="select-entrada" onchange="actualizarTotal()">
+          <option value="general" data-precio="30">General — Bs. 30</option>
+          <option value="premium" data-precio="55">Premium — Bs. 55</option>
+          <option value="estudiante" data-precio="22">Estudiante — Bs. 22</option>
+          <option value="familia" data-precio="100">Pack Familia — Bs. 100</option>
+        </select>
+      </div>
+
+      <div class="modal-total">
+        Total: <span id="modalTotalPrecio">Bs. 0</span>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-gold" onclick="confirmarCompra()"><span>✅ Confirmar Compra</span></button>
+        <button class="btn-outline" onclick="closeModalDirect()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOGIN -->
+<div class="modal-overlay" id="loginOverlay" onclick="cerrarLoginFondo(event)">
+  <div class="modal login-modal">
+    <button class="modal-close" onclick="closeLoginDirect()">✕</button>
+    <h2 style="font-family:'Playfair Display',serif;color:var(--dorado);margin-bottom:20px;font-size:1.4rem;text-align:center;">
+      🎬 CINE EXPRESS
+    </h2>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginTab('login',this)">Iniciar Sesión</button>
+      <button class="login-tab" onclick="switchLoginTab('registro',this)">Registrarse</button>
+    </div>
+    <div id="login-form">
+      <input class="form-input" type="email" id="loginEmail" placeholder="Email"/>
+      <input class="form-input" type="password" id="loginPass" placeholder="Contraseña"/>
+      <div id="loginMsg" class="form-msg"></div>
+      <button class="btn-gold full" onclick="doLogin()"><span>Entrar</span></button>
+      <p style="color:var(--plomo-texto);font-size:.72rem;margin-top:14px;text-align:center;">
+        Demo: iara@cineexpress.bo / 1234
+      </p>
+    </div>
+    <div id="registro-form" style="display:none">
+      <input class="form-input" type="text" id="regNombre" placeholder="Nombre completo"/>
+      <input class="form-input" type="email" id="regEmail" placeholder="Email"/>
+      <input class="form-input" type="password" id="regPass" placeholder="Contraseña"/>
+      <div id="regMsg" class="form-msg"></div>
+      <button class="btn-gold full" onclick="doRegistro()"><span>Crear Cuenta</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- CARRITO LATERAL -->
+<div class="carrito-panel" id="carritoPanel">
+  <div class="carrito-header">
+    <h3>🛒 Mi Carrito</h3>
+    <button onclick="toggleCarrito()">✕</button>
+  </div>
+  <div class="carrito-items" id="carritoItems">
+    <p class="carrito-vacio">Tu carrito está vacío 🛒</p>
+  </div>
+  <div class="carrito-footer">
+    <div class="carrito-total">Total: <span id="carritoTotal">Bs. 0</span></div>
+    <button class="btn-gold full" onclick="finalizarCompra()"><span>Finalizar Compra</span></button>
+    <button class="btn-outline" onclick="vaciarCarrito()"
+      style="margin-top:8px;width:100%;text-align:center;">
+      🗑️ Vaciar Carrito
+    </button>
+  </div>
+</div>
+<div class="carrito-overlay" id="carritoOverlay" onclick="toggleCarrito()"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
