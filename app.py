@@ -169,7 +169,7 @@ def init_db():
             ('Sprite', 'Refresco limón-lima bien frío y muy burbujeante.', 12.0, 'bebidas',
              'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&h=300&fit=crop', 0),
             ('Fanta', 'Sabor naranja intenso, fresquísima con mucho gas.', 12.0, 'bebidas',
-             '/static/images/fanta1.jpg', 0),
+             '/static/images/Fanta1.jpg', 0),
             ('Pepsi', 'El sabor inconfundible de Pepsi en vaso grande con hielo.', 12.0, 'bebidas',
              'https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=400&h=300&fit=crop', 0),
             ('Nachos', 'Nachos crujientes con queso cheddar fundido y jalapeños.', 22.0, 'snacks',
