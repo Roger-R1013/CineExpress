@@ -456,4 +456,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const items = await res.json();
     document.getElementById('carritoCount').textContent = items.length;
   } catch(e) {}
+
+  // Bloquear números y caracteres especiales en el campo nombre del registro
+  const campoNombre = document.getElementById('regNombre');
+  if (campoNombre) {
+    campoNombre.addEventListener('keypress', (e) => {
+      const permitido = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]$/;
+      if (!permitido.test(e.key)) {
+        e.preventDefault();
+      }
+    });
+
+    // También bloquear si alguien pega texto con números
+    campoNombre.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const texto = (e.clipboardData || window.clipboardData).getData('text');
+      const limpio = texto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, '');
+      document.execCommand('insertText', false, limpio);
+    });
+  }
 });
