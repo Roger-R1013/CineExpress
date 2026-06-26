@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import sqlite3
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = 'cineexpress_secret_2026'
@@ -149,49 +150,32 @@ def init_db():
     # ENTRADAS
     if c.execute("SELECT COUNT(*) FROM entradas").fetchone()[0] == 0:
         entradas = [
-            ('Entrada General', 'Acceso a todas las salas estándar. Audio original con subtítulos.', 30.0, 'general', '🎞️'),
-            ('Entrada Premium', 'Sala VIP con butacas reclinables, pantalla 4K y Dolby Atmos.', 55.0, 'premium', '⭐'),
-            ('Pack Familia (4 personas)', 'Cuatro entradas con ahorro especial. Válido fines de semana.', 100.0, 'familia', '👨‍👩‍👧‍👦'),
-            ('Estudiante / Menor', 'Descuento con carnet vigente y menores de 12 años.', 22.0, 'estudiante', '🎓'),
+            ('Entrada General', 'Acceso a todas las salas estándar. Audio original con subtítulos.', 30.0, 'general', ''),
+            ('Entrada Premium', 'Sala VIP con butacas reclinables, pantalla 4K y Dolby Atmos.', 55.0, 'premium', ''),
+            ('Pack Familia (4 personas)', 'Cuatro entradas con ahorro especial. Válido fines de semana.', 100.0, 'familia', ''),
+            ('Estudiante / Menor', 'Descuento con carnet vigente y menores de 12 años.', 22.0, 'estudiante', ''),
         ]
         c.executemany('INSERT INTO entradas (nombre,descripcion,precio,tipo,icono) VALUES (?,?,?,?,?)', entradas)
 
     # MENU
     if c.execute("SELECT COUNT(*) FROM menu_items").fetchone()[0] == 0:
         menu = [
-            # ✅ Pipocas Dulces
             ('Pipocas Dulces', 'Palomitas bañadas en caramelo artesanal, perfectamente crujientes.', 18.0, 'snacks',
              'https://images.pexels.com/photos/30910197/pexels-photo-30910197.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop', 1),
-
-            # ✅ Pipocas Saladas
             ('Pipocas Saladas', 'Palomitas clásicas con mantequilla y sal marina.', 15.0, 'snacks',
              'https://images.pexels.com/photos/33129/popcorn-movie-party-entertainment.jpg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop', 0),
-
-            # ✅ Coca-Cola
             ('Coca-Cola', 'Coca-Cola fría en vaso grande con hielo. Clásico irresistible.', 12.0, 'bebidas',
              'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=300&fit=crop', 1),
-
-            # ✅ Sprite
             ('Sprite', 'Refresco limón-lima bien frío y muy burbujeante.', 12.0, 'bebidas',
              'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&h=300&fit=crop', 0),
-
-            # ✅ Fanta 
             ('Fanta', 'Sabor naranja intenso, fresquísima con mucho gas.', 12.0, 'bebidas',
              '/static/images/fanta1.jpg', 0),
-
-            # ✅ Pepsi
             ('Pepsi', 'El sabor inconfundible de Pepsi en vaso grande con hielo.', 12.0, 'bebidas',
              'https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=400&h=300&fit=crop', 0),
-
-            # ✅ Nachos
             ('Nachos', 'Nachos crujientes con queso cheddar fundido y jalapeños.', 22.0, 'snacks',
              'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=400&h=300&fit=crop', 1),
-
-            # ✅ Hot Dog — URL actualizada (Kaique Lopes, Pexels ID 9304021)
             ('Hot Dog', 'Salchicha premium en pan brioche con mostaza y kétchup.', 20.0, 'comidas',
              'https://images.pexels.com/photos/9304021/pexels-photo-9304021.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop', 0),
-
-            # ✅ Chocolate
             ('Chocolate', 'Barra de chocolate belga premium. El dulce final perfecto.', 14.0, 'snacks',
              'https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&h=300&fit=crop', 0),
         ]
@@ -237,15 +221,21 @@ def login():
 @app.route('/registro', methods=['POST'])
 def registro():
     data = request.get_json()
+    nombre = data.get('nombre', '').strip()
+
+    # Validación backend: solo letras, tildes, ñ y espacios
+    if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', nombre):
+        return jsonify({'ok': False, 'msg': 'El nombre solo debe contener letras, sin números ni caracteres especiales'})
+
     db = get_db()
     try:
         db.execute('INSERT INTO usuarios (nombre,email,password) VALUES (?,?,?)',
-                   (data['nombre'], data['email'], data['password']))
+                   (nombre, data['email'], data['password']))
         db.commit()
         user = db.execute('SELECT * FROM usuarios WHERE email=?', (data['email'],)).fetchone()
         session['usuario_id'] = user['id']
         db.close()
-        return jsonify({'ok': True, 'nombre': data['nombre']})
+        return jsonify({'ok': True, 'nombre': nombre})
     except Exception as e:
         db.close()
         return jsonify({'ok': False, 'msg': 'El email ya está registrado'})
@@ -333,7 +323,7 @@ def comprar():
                (int(data['total']), usuario_id))
     db.commit()
     db.close()
-    return jsonify({'ok': True, 'msg': '¡Compra realizada con éxito!'})
+    return jsonify({'ok': True, 'msg': 'Compra realizada con exito'})
 
 @app.route('/api/carrito', methods=['GET'])
 def get_carrito():
@@ -376,9 +366,9 @@ if __name__ == '__main__':
     init_db()
 
     print("========================================")
-    print("🎬 CINEEXPRESS - SERVIDOR INICIADO")
+    print("CINEEXPRESS - SERVIDOR INICIADO")
     print("========================================")
-    print("🌐 URL: http://localhost:5001")
+    print("URL: http://localhost:5001")
     print("========================================")
 
     app.run(host="localhost", port=5001, debug=True)

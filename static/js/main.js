@@ -55,7 +55,7 @@ async function openModal(id, titulo, genero, desc, rating, imagen) {
   document.getElementById('modalTitle').textContent  = titulo;
   document.getElementById('modalGenre').textContent  = genero;
   document.getElementById('modalDesc').textContent   = desc;
-  document.getElementById('modalRating').textContent = '⭐ ' + rating;
+  document.getElementById('modalRating').textContent = rating;
   document.getElementById('modalImg').src            = imagen;
   document.getElementById('seccionAsientos').style.display = 'none';
   document.getElementById('salaGrid').innerHTML      = '';
@@ -164,10 +164,10 @@ function actualizarTotal() {
 
 async function confirmarCompra() {
   if (!horarioActual) {
-    showToast('⚠️ Selecciona un horario primero'); return;
+    showToast('Selecciona un horario primero'); return;
   }
   if (asientosSeleccionados.length === 0) {
-    showToast('⚠️ Selecciona al menos un asiento'); return;
+    showToast('Selecciona al menos un asiento'); return;
   }
   const select   = document.getElementById('modalEntradaTipo');
   const tipo     = select.value;
@@ -190,15 +190,15 @@ async function confirmarCompra() {
     const data = await res.json();
     if (data.ok) {
       closeModalDirect();
-      showToast('✅ ¡Compra confirmada! ' + asientosSeleccionados.length +
-        ' entrada(s) para <b>' + peliculaActual.titulo + '</b>. +' + total + ' puntos 🎬');
+      showToast('Compra confirmada. ' + asientosSeleccionados.length +
+        ' entrada(s) para <b>' + peliculaActual.titulo + '</b>. +' + total + ' puntos');
       setTimeout(() => location.reload(), 3000);
     } else {
-      showToast('❌ ' + data.msg);
+      showToast(data.msg);
       if (data.msg && data.msg.includes('sesión')) setTimeout(() => openLogin(), 1500);
     }
   } catch(e) {
-    showToast('❌ Error de conexión. Intenta de nuevo.');
+    showToast('Error de conexión. Intenta de nuevo.');
   }
 }
 
@@ -245,10 +245,10 @@ async function agregarCarrito(tipo, itemId, nombre, precio) {
     const data = await res.json();
     if (data.ok) {
       document.getElementById('carritoCount').textContent = data.total_carrito;
-      showToast('🛒 <b>' + nombre + '</b> agregado al carrito');
+      showToast('<b>' + nombre + '</b> agregado al carrito');
     }
   } catch(e) {
-    showToast('❌ Error al agregar al carrito');
+    showToast('Error al agregar al carrito');
   }
 }
 
@@ -261,7 +261,7 @@ async function renderCarrito() {
     const items = await res.json();
 
     if (items.length === 0) {
-      container.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío 🛒</p>';
+      container.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío</p>';
       totalEl.textContent = 'Bs. 0';
       return;
     }
@@ -278,7 +278,7 @@ async function renderCarrito() {
           '<div class="carrito-item-nombre">' + item.nombre + '</div>' +
           '<div class="carrito-item-precio">Bs. ' + subtotal.toFixed(0) + '</div>' +
         '</div>' +
-        '<button class="carrito-item-remove" onclick="eliminarItem(' + item.id + ')">✕</button>';
+        '<button class="carrito-item-remove" onclick="eliminarItem(' + item.id + ')">X</button>';
       container.appendChild(div);
     });
     totalEl.textContent = 'Bs. ' + total.toFixed(0);
@@ -299,17 +299,17 @@ async function vaciarCarrito() {
   await fetch('/api/carrito/vaciar', { method: 'POST' });
   document.getElementById('carritoCount').textContent = '0';
   renderCarrito();
-  showToast('🗑️ Carrito vaciado');
+  showToast('Carrito vaciado');
 }
 
 async function finalizarCompra() {
   const res   = await fetch('/api/carrito');
   const items = await res.json();
-  if (items.length === 0) { showToast('⚠️ Tu carrito está vacío'); return; }
+  if (items.length === 0) { showToast('Tu carrito está vacío'); return; }
   const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
   await vaciarCarrito();
   toggleCarrito();
-  showToast('✅ ¡Compra finalizada! Total: <b>Bs. ' + total.toFixed(0) + '</b>. ¡Gracias por elegir CINE EXPRESS! 🎬');
+  showToast('Compra finalizada. Total: <b>Bs. ' + total.toFixed(0) + '</b>. Gracias por elegir CINE EXPRESS.');
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -349,7 +349,7 @@ async function doLogin() {
     });
     const data = await res.json();
     if (data.ok) {
-      msg.textContent = '¡Bienvenido, ' + data.nombre + '! 🎬';
+      msg.textContent = 'Bienvenido, ' + data.nombre;
       msg.className   = 'form-msg success';
       setTimeout(() => location.reload(), 1200);
     } else {
@@ -367,10 +367,19 @@ async function doRegistro() {
   const email    = document.getElementById('regEmail').value.trim();
   const password = document.getElementById('regPass').value;
   const msg      = document.getElementById('regMsg');
+
   if (!nombre || !email || !password) {
     msg.textContent = 'Completa todos los campos';
     msg.className   = 'form-msg error'; return;
   }
+
+  // Validación: el nombre solo debe contener letras y espacios (incluye tildes y ñ)
+  const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/;
+  if (!soloLetras.test(nombre)) {
+    msg.textContent = 'El nombre solo debe contener letras, sin números ni caracteres especiales';
+    msg.className   = 'form-msg error'; return;
+  }
+
   try {
     const res  = await fetch('/registro', {
       method: 'POST',
@@ -379,7 +388,7 @@ async function doRegistro() {
     });
     const data = await res.json();
     if (data.ok) {
-      msg.textContent = '¡Cuenta creada! Bienvenido ' + data.nombre + ' 🎉';
+      msg.textContent = 'Cuenta creada. Bienvenido, ' + data.nombre;
       msg.className   = 'form-msg success';
       setTimeout(() => location.reload(), 1200);
     } else {
@@ -422,7 +431,7 @@ async function cargarPerfil() {
       return items.map(c =>
         '<div class="historial-item">' +
           '<div class="historial-dot"></div>' +
-          '<div class="historial-movie">🎬 ' + (c.titulo || 'Producto') +
+          '<div class="historial-movie">' + (c.titulo || 'Producto') +
             ' — ' + c.entrada_tipo +
             ' (' + c.cantidad + ' entrada' + (c.cantidad > 1 ? 's' : '') + ')</div>' +
           '<div class="historial-date">' + (c.fecha || '').slice(0,10) + '</div>' +

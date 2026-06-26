@@ -20,7 +20,7 @@
   </ul>
   <div class="nav-right">
     <button class="carrito-btn" onclick="toggleCarrito()">
-      🛒 <span class="carrito-count" id="carritoCount">0</span>
+      Carrito <span class="carrito-count" id="carritoCount">0</span>
     </button>
     {% if usuario %}
     <div class="nav-profile" onclick="scrollSec('perfil')">
@@ -38,7 +38,7 @@
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-badge">⭐ Experiencia cinematográfica premium</div>
+    <div class="hero-badge">Experiencia cinematográfica premium</div>
     <h1 class="hero-title">CINE EXPRESS</h1>
     <p class="hero-sub">Donde el cine cobra vida</p>
     <p class="hero-desc">Las mejores películas, la mejor experiencia. Disfruta con tecnología Dolby Atmos y pantallas 4K.</p>
@@ -53,7 +53,7 @@
 <!-- CARTELERA -->
 <section id="cartelera">
   <div class="section-header">
-    <div class="section-eyebrow">🎬 En cartelera</div>
+    <div class="section-eyebrow">En cartelera</div>
     <h2 class="section-title">Películas de esta semana</h2>
     <div class="gold-line"></div>
   </div>
@@ -86,7 +86,7 @@
       </div>
       <div class="movie-overlay">
         <div class="movie-info-bottom">
-          <div class="movie-rating">⭐ {{ p['calificacion'] }}</div>
+          <div class="movie-rating">{{ p['calificacion'] }}</div>
           <div class="movie-info-title">{{ p['titulo'] }}</div>
           <div class="movie-genre">{{ p['genero'] }}</div>
           <button class="btn-comprar">Comprar Entrada</button>
@@ -100,14 +100,43 @@
 <!-- ENTRADAS -->
 <section id="entradas">
   <div class="section-header">
-    <div class="section-eyebrow">🎟️ Precios</div>
+    <div class="section-eyebrow">Precios</div>
     <h2 class="section-title">Compra tus Entradas</h2>
     <div class="gold-line"></div>
   </div>
   <div class="entradas-container">
     {% for e in entradas %}
     <div class="entrada-card">
-      <div class="entrada-icon">{{ e['icono'] }}</div>
+      <div class="entrada-icon">
+        {% if e['tipo'] == 'general' %}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="10" rx="2"/>
+            <path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/>
+            <line x1="12" y1="10" x2="12" y2="14"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+        {% elif e['tipo'] == 'premium' %}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        {% elif e['tipo'] == 'familia' %}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        {% elif e['tipo'] == 'estudiante' %}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+        {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="10" rx="2"/>
+          </svg>
+        {% endif %}
+      </div>
       <div class="entrada-info">
         <div class="entrada-tipo">{{ e['nombre'] }}</div>
         <div class="entrada-desc">{{ e['descripcion'] }}</div>
@@ -131,7 +160,7 @@
 <!-- MENÚ -->
 <section id="menu">
   <div class="section-header">
-    <div class="section-eyebrow">🍿 Snacks & Bebidas</div>
+    <div class="section-eyebrow">Snacks y Bebidas</div>
     <h2 class="section-title">Nuestro Menú</h2>
     <div class="gold-line"></div>
   </div>
@@ -142,7 +171,7 @@
          data-nombre="{{ item['nombre'] }}"
          data-precio="{{ item['precio'] }}"
          onclick="agregarMenuCarrito(this)">
-      {% if item['popular'] %}<div class="gold-tag">⭐ Popular</div>{% endif %}
+      {% if item['popular'] %}<div class="gold-tag">Popular</div>{% endif %}
       <div class="menu-img-wrap">
         <img src="{{ item['imagen'] }}" alt="{{ item['nombre'] }}"/>
       </div>
@@ -159,7 +188,7 @@
 <section id="perfil">
   <div class="perfil-container">
     <div class="section-header">
-      <div class="section-eyebrow">👤 Cuenta</div>
+      <div class="section-eyebrow">Cuenta</div>
       <h2 class="section-title">Mi Perfil</h2>
       <div class="gold-line"></div>
     </div>
@@ -216,7 +245,7 @@
     </div>
     {% else %}
     <div class="login-prompt">
-      <div style="font-size:3rem;margin-bottom:16px;">🔐</div>
+      <div style="font-size:3rem;margin-bottom:16px;"></div>
       <h3 style="font-family:'Playfair Display',serif;color:var(--blanco);margin-bottom:8px;">Inicia sesión para ver tu perfil</h3>
       <p style="color:var(--plomo-texto);margin-bottom:24px;">Accede a tu historial de compras, puntos y más.</p>
       <button class="btn-gold" onclick="openLogin()"><span>Iniciar Sesión</span></button>
@@ -253,24 +282,24 @@
     <div class="footer-col">
       <h4>Contacto</h4>
       <ul>
-        <li>📍 Av. Busch, Santa Cruz</li>
-        <li>📞 +591 77 777 777</li>
-        <li>✉️ cineexpress@gmail.com</li>
-        <li>🕐 10:00 – 23:00</li>
+        <li>Av. Busch, Santa Cruz</li>
+        <li>+591 77 777 777</li>
+        <li>cineexpress@gmail.com</li>
+        <li>10:00 – 23:00</li>
       </ul>
     </div>
   </div>
   <div class="footer-divider"></div>
   <div class="footer-bottom">
-    <span>© 2026 <span class="footer-gold">CINE EXPRESS</span>. Todos los derechos reservados.</span>
-    <span>Diseñado con <span class="footer-gold">♦</span> para amantes del cine</span>
+    <span>© 2026 <span class="footer-gold">CINE EXPRESS</span>
+    <span>Diseñado por estudiantes de UNIFRANZ</span>
   </div>
 </footer>
 
 <!-- MODAL PELÍCULA -->
 <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalFondo(event)">
   <div class="modal" id="modalPelicula">
-    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <button class="modal-close" onclick="closeModalDirect()">X</button>
     <div class="modal-poster">
       <img id="modalImg" src="" alt=""/>
     </div>
@@ -281,16 +310,16 @@
       <div class="modal-desc" id="modalDesc"></div>
 
       <div class="modal-section">
-        <h4>📅 Selecciona Horario</h4>
+        <h4>Selecciona Horario</h4>
         <div class="horarios-grid" id="horariosGrid">
           <span style="color:var(--plomo-texto);font-size:.8rem">Cargando horarios...</span>
         </div>
       </div>
 
       <div class="modal-section" id="seccionAsientos" style="display:none">
-        <h4>🪑 Selecciona tus Asientos</h4>
+        <h4>Selecciona tus Asientos</h4>
         <p style="font-size:.75rem;color:var(--plomo-texto);margin-bottom:12px;" id="infoSala"></p>
-        <div class="pantalla-cine">◀ PANTALLA ▶</div>
+        <div class="pantalla-cine">PANTALLA</div>
         <div class="sala-grid" id="salaGrid"></div>
         <div class="leyenda">
           <span class="leyenda-item"><span class="asiento-demo libre"></span> Libre</span>
@@ -303,7 +332,7 @@
       </div>
 
       <div class="modal-section">
-        <h4>🎟️ Tipo de Entrada</h4>
+        <h4>Tipo de Entrada</h4>
         <select id="modalEntradaTipo" class="select-entrada" onchange="actualizarTotal()">
           <option value="general" data-precio="30">General — Bs. 30</option>
           <option value="premium" data-precio="55">Premium — Bs. 55</option>
@@ -317,7 +346,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-gold" onclick="confirmarCompra()"><span>✅ Confirmar Compra</span></button>
+        <button class="btn-gold" onclick="confirmarCompra()"><span>Confirmar Compra</span></button>
         <button class="btn-outline" onclick="closeModalDirect()">Cancelar</button>
       </div>
     </div>
@@ -327,9 +356,9 @@
 <!-- MODAL LOGIN -->
 <div class="modal-overlay" id="loginOverlay" onclick="cerrarLoginFondo(event)">
   <div class="modal login-modal">
-    <button class="modal-close" onclick="closeLoginDirect()">✕</button>
+    <button class="modal-close" onclick="closeLoginDirect()">X</button>
     <h2 style="font-family:'Playfair Display',serif;color:var(--dorado);margin-bottom:20px;font-size:1.4rem;text-align:center;">
-      🎬 CINE EXPRESS
+      CINE EXPRESS
     </h2>
     <div class="login-tabs">
       <button class="login-tab active" onclick="switchLoginTab('login',this)">Iniciar Sesión</button>
@@ -357,18 +386,18 @@
 <!-- CARRITO LATERAL -->
 <div class="carrito-panel" id="carritoPanel">
   <div class="carrito-header">
-    <h3>🛒 Mi Carrito</h3>
-    <button onclick="toggleCarrito()">✕</button>
+    <h3>Mi Carrito</h3>
+    <button onclick="toggleCarrito()">X</button>
   </div>
   <div class="carrito-items" id="carritoItems">
-    <p class="carrito-vacio">Tu carrito está vacío 🛒</p>
+    <p class="carrito-vacio">Tu carrito está vacío</p>
   </div>
   <div class="carrito-footer">
     <div class="carrito-total">Total: <span id="carritoTotal">Bs. 0</span></div>
     <button class="btn-gold full" onclick="finalizarCompra()"><span>Finalizar Compra</span></button>
     <button class="btn-outline" onclick="vaciarCarrito()"
       style="margin-top:8px;width:100%;text-align:center;">
-      🗑️ Vaciar Carrito
+      Vaciar Carrito
     </button>
   </div>
 </div>
